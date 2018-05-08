@@ -1,0 +1,56 @@
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+<script crossorigin src="https://unpkg.com/axios@0.16.2/dist/axios.js"></script>
+<script type="text/babel">
+const rootElement = document.getElementById('root')
+class UserCompany extends React.Component {
+    state = {company: undefined, loaded: false}
+    componentDidMount() {
+        axios({
+            url: 'https://api.github.com/graphql',
+            method: 'post',
+            data: {
+                query: `{
+                    user(login: "${this.props.username}") {
+                        company
+                    }
+                }`,
+            },
+            headers: {Authorization: `bearer 7bd3f496bdf118b15ac71a37a664d4f4ba2396ee`},
+        }).then(response => {
+            this.setState({
+                loaded: true,
+                company: response.data.data.user.company,
+            })
+        }, error => {
+            this.setState({
+                error,
+                loaded: true,
+            })
+        })
+    }
+    render() {
+        return (
+            this.state.error
+                ? 'Unknown (error)' 
+                :  this.state.loaded 
+                    ? this.state.company || 'Unknown' 
+                    : '...'
+        )
+    }
+}
+
+const username = 'ztrixack'
+const element = (
+    <div>
+        <div>
+            {`@${username} work at `}
+            <UserCompany username={username} />
+        </div>
+    </div>
+)
+
+ReactDOM.render(element, rootElement)
+</script>
